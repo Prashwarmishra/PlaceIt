@@ -1,0 +1,15 @@
+{
+  "manifest_version": 3,
+  "name": "InPlace",
+  "version": "0.1.0",
+  "description": "Visualize products in your own space",
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_title": "Visualize products in your own space"
+  },
+  "permissions": [
+    "activeTab",
+    "storage"
+  ]
+}
+

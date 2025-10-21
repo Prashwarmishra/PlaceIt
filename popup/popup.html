@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>InPlace</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <h1>InPlace</h1>
+    <p class="subtitle">Upload your background image</p>
+    
+    <div class="upload-section">
+      <input type="file" id="imageInput" accept="image/*" hidden>
+      <button id="uploadBtn" class="upload-btn">Choose Image</button>
+      <p class="file-info" id="fileInfo">No file selected</p>
+    </div>
+
+    <div class="preview-section" id="previewSection" style="display: none;">
+      <h2>Preview</h2>
+      <img id="previewImage" alt="Preview">
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
+
