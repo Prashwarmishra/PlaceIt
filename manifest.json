@@ -4,13 +4,16 @@
   "version": "0.1.0",
   "description": "Visualize products in your own space",
   "action": {
-    "default_popup": "popup/popup.html",
     "default_title": "Visualize products in your own space"
+  },
+  "side_panel": {
+    "default_path": "sidebar/sidebar.html"
   },
   "permissions": [
     "activeTab",
     "storage",
-    "scripting"
+    "scripting",
+    "sidePanel"
   ],
   "host_permissions": [
     "<all_urls>"
@@ -21,6 +24,9 @@
       "js": ["content/content.js"],
       "run_at": "document_idle"
     }
-  ]
+  ],
+  "background": {
+    "service_worker": "background/background.js"
+  }
 }
 
