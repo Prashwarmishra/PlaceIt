@@ -11,6 +11,24 @@ function scrapeProductImages() {
   const seenUrls = new Set();
   const minSize = 250;
   
+  const amazonMainImage = document.getElementById('landingImage');
+  if (amazonMainImage) {
+    const url = amazonMainImage.src || amazonMainImage.dataset.src || amazonMainImage.dataset.oldHires || amazonMainImage.dataset.hires;
+    if (url) {
+      const width = amazonMainImage.naturalWidth || amazonMainImage.width || 0;
+      const height = amazonMainImage.naturalHeight || amazonMainImage.height || 0;
+      
+      seenUrls.add(url);
+      images.push({
+        url: url,
+        alt: amazonMainImage.alt || 'Amazon Main Product Image',
+        width: width,
+        height: height,
+        priority: true // Mark as priority image
+      });
+    }
+  }
+  
   const allImages = document.querySelectorAll('img');
   
   allImages.forEach(img => {
@@ -84,7 +102,15 @@ function scrapeProductImages() {
     }
   });
   
-  images.sort((a, b) => (b.width * b.height) - (a.width * a.height));
+  // Sort images: priority images first, then by size
+  images.sort((a, b) => {
+    // Priority images (like Amazon landingImage) come first
+    if (a.priority && !b.priority) return -1;
+    if (!a.priority && b.priority) return 1;
+    
+    // Otherwise sort by size
+    return (b.width * b.height) - (a.width * a.height);
+  });
   
   return images;
 }

@@ -241,6 +241,11 @@ h3 {
   border-radius: 6px;
   cursor: pointer;
   transition: background 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  position: relative;
 }
 
 .generate-btn:hover {
@@ -249,6 +254,29 @@ h3 {
 
 .generate-btn:active {
   transform: scale(0.98);
+}
+
+.generate-btn:disabled {
+  background: #90caf9;
+  cursor: not-allowed;
+}
+
+.generate-btn:disabled:hover {
+  background: #90caf9;
+  transform: none;
+}
+
+.btn-spinner svg {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Warning Banner */
@@ -338,7 +366,7 @@ h3 {
   font-size: 14px;
   color: #666;
   line-height: 1.6;
-  margin-bottom: 20px;
+  margin-bottom: 12px;
 }
 
 .setting-description a {
@@ -349,6 +377,17 @@ h3 {
 
 .setting-description a:hover {
   text-decoration: underline;
+}
+
+.setting-note {
+  font-size: 13px;
+  color: #ff9800;
+  background: #fff3cd;
+  padding: 10px 12px;
+  border-radius: 6px;
+  border-left: 3px solid #ff9800;
+  margin-bottom: 20px;
+  line-height: 1.5;
 }
 
 /* Input Group */
@@ -601,6 +640,73 @@ h3 {
 }
 
 .modal-btn:active {
+  transform: scale(0.98);
+}
+
+/* Step 4: Generated Image Result */
+.result-container {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.generated-image-wrapper {
+  margin-bottom: 20px;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+#generatedImage {
+  width: 100%;
+  display: block;
+  border-radius: 8px;
+}
+
+.result-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.action-btn {
+  width: 100%;
+  padding: 12px 20px;
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.download-btn {
+  background: #4CAF50;
+  color: white;
+}
+
+.download-btn:hover {
+  background: #45a049;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+}
+
+.secondary-btn {
+  background: #f0f0f0;
+  color: #666;
+}
+
+.secondary-btn:hover {
+  background: #e0e0e0;
+  color: #333;
+}
+
+.action-btn:active {
   transform: scale(0.98);
 }
 

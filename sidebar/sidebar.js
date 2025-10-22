@@ -7,12 +7,19 @@ const previewImage = document.getElementById('previewImage');
 const step1 = document.getElementById('step1');
 const step2 = document.getElementById('step2');
 const step3 = document.getElementById('step3');
+const step4 = document.getElementById('step4');
 
 const loadingImages = document.getElementById('loadingImages');
 const productImagesGrid = document.getElementById('productImagesGrid');
 const noImagesFound = document.getElementById('noImagesFound');
 const selectedProductImage = document.getElementById('selectedProductImage');
 const generateBtn = document.getElementById('generateBtn');
+const btnText = generateBtn.querySelector('.btn-text');
+const btnSpinner = generateBtn.querySelector('.btn-spinner');
+
+const generatedImage = document.getElementById('generatedImage');
+const downloadBtn = document.getElementById('downloadBtn');
+const generateAgainBtn = document.getElementById('generateAgainBtn');
 
 const mainView = document.getElementById('mainView');
 const settingsView = document.getElementById('settingsView');
@@ -156,13 +163,251 @@ function showStep3(imageUrl) {
 }
 
 // Generate button
-generateBtn.addEventListener('click', () => {
+generateBtn.addEventListener('click', async () => {
   if (!geminiApiKey) {
     promptForApiKey();
     return;
   }
-  alert('Image generation will be implemented next!\n\nBackground: ' + (backgroundImageData ? 'Uploaded ✓' : 'None') + '\nProduct: ' + (selectedProductUrl ? 'Selected ✓' : 'None') + '\nAPI Key: Set ✓');
+  
+  if (!backgroundImageData || !selectedProductUrl) {
+    alert('Please upload a background image and select a product first.');
+    return;
+  }
+  
+  await generateImage();
 });
+
+// Generate Again button
+generateAgainBtn.addEventListener('click', () => {
+  step4.style.display = 'none';
+  step1.scrollIntoView({ behavior: 'smooth' });
+});
+
+// ============================================
+// IMAGE GENERATION WITH GEMINI API
+// ============================================
+
+async function generateImage() {
+  // Show loading state
+  setGeneratingState(true);
+  
+  try {
+    // Fetch product image as base64
+    const productImageBase64 = await fetchImageAsBase64(selectedProductUrl);
+    
+    // Extract base64 data without data URL prefix
+    const backgroundBase64 = backgroundImageData.split(',')[1];
+    
+    // Call Gemini API
+    const result = await callGeminiAPI(backgroundBase64, productImageBase64);
+    
+    // Display the generated image
+    if (result && result.image) {
+      displayGeneratedImage(result.image);
+    } else {
+      throw new Error('No image generated from API');
+    }
+    
+  } catch (error) {
+    console.error('Error generating image:', error);
+    handleGenerationError(error);
+  } finally {
+    setGeneratingState(false);
+  }
+}
+
+function setGeneratingState(isGenerating) {
+  generateBtn.disabled = isGenerating;
+  
+  if (isGenerating) {
+    btnText.style.display = 'none';
+    btnSpinner.style.display = 'inline-block';
+  } else {
+    btnText.style.display = 'inline';
+    btnSpinner.style.display = 'none';
+  }
+}
+
+async function fetchImageAsBase64(imageUrl) {
+  try {
+    const response = await fetch(imageUrl);
+    const blob = await response.blob();
+    
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        // Extract base64 data without data URL prefix
+        const base64 = reader.result.split(',')[1];
+        resolve(base64);
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  } catch (error) {
+    console.error('Error fetching product image:', error);
+    throw new Error('Failed to fetch product image');
+  }
+}
+
+async function callGeminiAPI(backgroundBase64, productBase64) {
+  // Using Gemini 2.5 Flash for image generation
+  const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent?key=${geminiApiKey}`;
+  
+  const prompt = `You are an expert at product visualization and interior design. 
+
+I'm providing you with two images:
+1. BACKGROUND IMAGE: A room or space where we want to visualize a product
+2. PRODUCT IMAGE: The furniture or item that needs to be placed in the space
+
+Your task is to create a photorealistic composite image that shows the product naturally integrated into the background space.
+
+Requirements:
+- Place the product in a realistic position that makes sense for the space
+- Match the lighting conditions of the room (shadows, highlights, ambient light)
+- Ensure proper scale and perspective - the product should look natural in size
+- Blend the product seamlessly with the environment
+- Maintain color harmony and realistic textures
+- Add appropriate shadows and reflections
+- Make it look like a professional product staging photo
+
+Generate a high-quality, photorealistic image showing the product placed in the room.`;
+
+  const requestBody = {
+    contents: [{
+      parts: [
+        { text: prompt },
+        {
+          inline_data: {
+            mime_type: "image/jpeg",
+            data: backgroundBase64
+          }
+        },
+        {
+          inline_data: {
+            mime_type: "image/jpeg",
+            data: productBase64
+          }
+        }
+      ]
+    }],
+    generationConfig: {
+      temperature: 0.7,
+      topK: 40,
+      topP: 0.95,
+      maxOutputTokens: 8192,
+      responseModalities: ["IMAGE"]
+    }
+  };
+
+  try {
+    const response = await fetch(API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(requestBody)
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error('API Error Response:', errorData);
+      throw new Error(errorData.error?.message || `API Error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log('API Response:', data);
+    
+    // Extract generated image from response
+    // Gemini 2.5 Flash returns image in the response
+    if (data.candidates && data.candidates[0]?.content?.parts) {
+      const parts = data.candidates[0].content.parts;
+      
+      // Look for inlineData with image (camelCase in response)
+      for (const part of parts) {
+        if (part.inlineData && part.inlineData.data) {
+          return {
+            image: `data:${part.inlineData.mimeType || 'image/jpeg'};base64,${part.inlineData.data}`
+          };
+        }
+      }
+      
+      // Some responses might have the image in a different format
+      if (parts[0] && parts[0].text) {
+        // If it returns base64 as text, handle that
+        const base64Match = parts[0].text.match(/^[A-Za-z0-9+/=]+$/);
+        if (base64Match) {
+          return {
+            image: `data:image/jpeg;base64,${parts[0].text}`
+          };
+        }
+      }
+    }
+    
+    throw new Error('No image data found in API response. The model may not support image generation yet.');
+    
+  } catch (error) {
+    console.error('Gemini API Error:', error);
+    throw error;
+  }
+}
+
+function displayGeneratedImage(imageDataUrl) {
+  generatedImage.src = imageDataUrl;
+  step4.style.display = 'block';
+  step4.scrollIntoView({ behavior: 'smooth' });
+  
+  // Setup download functionality
+  downloadBtn.onclick = () => downloadImage(imageDataUrl);
+}
+
+function downloadImage(imageDataUrl) {
+  const link = document.createElement('a');
+  link.href = imageDataUrl;
+  link.download = `inplace-generated-${Date.now()}.png`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+function handleGenerationError(error) {
+  let errorMessage = 'Failed to generate image. ';
+  let errorDetails = '';
+  
+  if (error.message.includes('API key') || error.message.includes('API_KEY_INVALID')) {
+    errorMessage += 'Invalid API key.';
+    errorDetails = '\n\nPlease check your API key in settings and make sure it\'s valid.';
+  } else if (error.message.includes('quota') || error.message.includes('RESOURCE_EXHAUSTED')) {
+    errorMessage += 'API quota exceeded.';
+    errorDetails = '\n\nYour API key has reached its usage limit. Please try again later or check your Google Cloud console.';
+  } else if (error.message.includes('fetch') || error.message.includes('Failed to fetch')) {
+    errorMessage += 'Network error.';
+    errorDetails = '\n\nPlease check your internet connection and try again.';
+  } else if (error.message.includes('model may not support')) {
+    errorMessage += 'Model not available.';
+    errorDetails = '\n\nGemini 2.5 Flash with image generation may not be available yet in your region, or your API key may not have access to this model.\n\nPlease check Google AI Studio for model availability.';
+  } else if (error.message.includes('PERMISSION_DENIED')) {
+    errorMessage += 'Permission denied.';
+    errorDetails = '\n\nYour API key doesn\'t have permission to use this model. Please check your API key settings in Google Cloud Console.';
+  } else if (error.message.includes('NOT_FOUND')) {
+    errorMessage += 'Model not found.';
+    errorDetails = '\n\nThe Gemini 2.5 Flash model might not be available in your region yet.';
+  } else {
+    errorMessage += error.message || 'Unknown error occurred.';
+    errorDetails = '\n\nPlease try again or contact support if the issue persists.';
+  }
+  
+  // Create a more user-friendly error dialog
+  const fullMessage = '❌ ' + errorMessage + errorDetails;
+  
+  // Log full error for debugging
+  console.error('Generation Error:', {
+    message: error.message,
+    error: error,
+    timestamp: new Date().toISOString()
+  });
+  
+  alert(fullMessage);
+}
 
 // ============================================
 // SETTINGS & NAVIGATION

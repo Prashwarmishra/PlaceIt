@@ -91,7 +91,42 @@
         <div class="selected-product">
           <img id="selectedProductImage" alt="Selected Product">
         </div>
-        <button id="generateBtn" class="generate-btn">Generate Image</button>
+        <button id="generateBtn" class="generate-btn">
+          <span class="btn-text">Generate Image</span>
+          <span class="btn-spinner" style="display: none;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10" stroke-opacity="0.25"></circle>
+              <path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round"></path>
+            </svg>
+          </span>
+        </button>
+      </div>
+
+      <!-- Step 4: Generated Result -->
+      <div id="step4" class="step" style="display: none;">
+        <p class="subtitle">Step 4: Generated Image</p>
+        <div class="result-container">
+          <div class="generated-image-wrapper">
+            <img id="generatedImage" alt="Generated Result">
+          </div>
+          <div class="result-actions">
+            <button id="downloadBtn" class="action-btn download-btn">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+              Download Image
+            </button>
+            <button id="generateAgainBtn" class="action-btn secondary-btn">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="1 4 1 10 7 10"></polyline>
+                <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+              </svg>
+              Generate Again
+            </button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -110,8 +145,11 @@
         <div class="setting-section">
           <h3>Gemini API Configuration</h3>
           <p class="setting-description">
-            Enter your Google Gemini API key to enable image generation. 
+            Enter your Google Gemini API key to enable AI-powered product visualization. 
             <a href="https://aistudio.google.com/app/apikey" target="_blank">Get your API key</a>
+          </p>
+          <p class="setting-note">
+            <strong>Note:</strong> This extension uses Gemini 2.5 Flash for image generation. Make sure your API key has access to this model.
           </p>
           
           <div class="input-group">
@@ -141,6 +179,7 @@
     </div>
   </div>
 
+  <script src="../utils/imageUtils.js"></script>
   <script src="sidebar.js"></script>
 </body>
 </html>
