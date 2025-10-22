@@ -9,17 +9,41 @@
 <body>
   <div class="container">
     <h1>InPlace</h1>
-    <p class="subtitle">Upload your background image</p>
     
-    <div class="upload-section">
-      <input type="file" id="imageInput" accept="image/*" hidden>
-      <button id="uploadBtn" class="upload-btn">Choose Image</button>
-      <p class="file-info" id="fileInfo">No file selected</p>
+    <!-- Step 1: Upload Background -->
+    <div id="step1" class="step">
+      <p class="subtitle">Step 1: Upload your background image</p>
+      <div class="upload-section">
+        <input type="file" id="imageInput" accept="image/*" hidden>
+        <button id="uploadBtn" class="upload-btn">Choose Image</button>
+        <p class="file-info" id="fileInfo">No file selected</p>
+      </div>
+      <div class="preview-section" id="previewSection" style="display: none;">
+        <h3>Background Preview</h3>
+        <img id="previewImage" alt="Background Preview">
+      </div>
     </div>
 
-    <div class="preview-section" id="previewSection" style="display: none;">
-      <h2>Preview</h2>
-      <img id="previewImage" alt="Preview">
+    <!-- Step 2: Select Product Image -->
+    <div id="step2" class="step" style="display: none;">
+      <p class="subtitle">Step 2: Select product image</p>
+      <div id="loadingImages" class="loading">
+        Scanning page for product images...
+      </div>
+      <div id="productImagesGrid" class="product-grid"></div>
+      <div id="noImagesFound" class="no-images" style="display: none;">
+        <p>No product images found on this page.</p>
+        <p class="hint">Make sure you're on a product detail page.</p>
+      </div>
+    </div>
+
+    <!-- Step 3: Selected Product -->
+    <div id="step3" class="step" style="display: none;">
+      <p class="subtitle">Step 3: Selected Product</p>
+      <div class="selected-product">
+        <img id="selectedProductImage" alt="Selected Product">
+      </div>
+      <button id="generateBtn" class="generate-btn">Generate Image</button>
     </div>
   </div>
 
