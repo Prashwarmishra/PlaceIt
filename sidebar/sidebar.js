@@ -24,6 +24,7 @@ const generateAgainBtn = document.getElementById('generateAgainBtn');
 const mainView = document.getElementById('mainView');
 const settingsView = document.getElementById('settingsView');
 const settingsBtn = document.getElementById('settingsBtn');
+const reloadBtn = document.getElementById('reloadBtn');
 const backBtn = document.getElementById('backBtn');
 const apiKeyWarning = document.getElementById('apiKeyWarning');
 const openSettingsFromWarning = document.getElementById('openSettingsFromWarning');
@@ -484,7 +485,31 @@ function showMainView() {
   checkApiKey();
 }
 
+function resetExtension() {
+  backgroundImageData = null;
+  selectedProductUrl = null;
+  
+  fileInfo.textContent = 'No file selected';
+  previewSection.style.display = 'none';
+  previewImage.src = '';
+  imageInput.value = '';
+  
+  step2.style.display = 'none';
+  productImagesGrid.innerHTML = '';
+  loadingImages.style.display = 'none';
+  noImagesFound.style.display = 'none';
+  
+  step3.style.display = 'none';
+  selectedProductImage.src = '';
+  
+  step4.style.display = 'none';
+  generatedImage.src = '';
+  
+  step1.scrollIntoView({ behavior: 'smooth' });
+}
+
 settingsBtn.addEventListener('click', showSettings);
+reloadBtn.addEventListener('click', resetExtension);
 backBtn.addEventListener('click', showMainView);
 openSettingsFromWarning.addEventListener('click', showSettings);
 
